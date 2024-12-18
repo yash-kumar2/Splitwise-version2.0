@@ -2,6 +2,7 @@ import { useEffect,useState } from 'react';
 import React from 'react';
 //import ExpenseCard from '../Expenses/ExpenseCard';
 //import axios from 'axios';
+import ExpenseCard from '../Expenses/ExpenseCard';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Modal } from 'antd';
@@ -9,10 +10,12 @@ import AddMembers from './AddMembers';
 // // import { FormControl } from '@mui/material';
 // // import Select from '@mui/material';
 // import { Select } from '@mui/material';
-import { FormControl } from '@mui/material';
+import { FormControl, getNativeSelectUtilityClasses } from '@mui/material';
+import SimplifiedSettlementCard from '../Expenses/SimplifiedSettlementCard';
 import {Select,MenuItem,TextField} from '@mui/material';
 import { FormGroup, FormControlLabel, Switch } from '@mui/material';
 import MemberTable from './MemberTable';
+import { Receipt, DollarSign, Calculator } from 'lucide-react';
 // import Select from '@mui/material';
 // import MenuItem from '@mui/material';
 
@@ -352,6 +355,11 @@ import axios from 'axios';
 const GroupDetailPage = ({ groupId }) => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [selectedSettlement, setSelectedSettlement] = useState(null);
+  const [selectedSimplifiedSettlement, setSelectedSimplifiedSettlement] = useState(null);
+  const [user,setUser]=useState(getNativeSelectUtilityClasses)
+  const [modalOpen,setModalOpen]=useState(false)
     const BASEURL='http://localhost:3000'
   let { id } = useParams();
   groupId=id
@@ -371,6 +379,7 @@ const GroupDetailPage = ({ groupId }) => {
           ...response.data.settlements.map((settlement) => ({ ...settlement, type: "settlement" })),
           ...response.data.simplifiedPayments.map((payment) => ({ ...payment, type: "simplifiedSettlement" })),
         ];
+        setUser(response.data.user)
         const sortedActivities = allActivities.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
@@ -389,15 +398,16 @@ const GroupDetailPage = ({ groupId }) => {
 
   return (
     <div className="space-y-4 p-4 bg-gray-100">
+     
       <h1 className="text-2xl font-bold text-gray-700">Group Activities</h1>
       {activities.map((activity) => {
         switch (activity.type) {
           case "expense":
-            return <ExpenseCard key={activity._id} expense={activity} />;
+            return <ExpenseCard key={activity._id} expense={activity} user={user} modalOpen={modalOpen} setModalOpen={setModalOpen} />;
           case "settlement":
-            return <SettlementCard key={activity._id} settlement={activity} />;
+            return <SettlementCard key={activity._id} settlement={activity} modalOpen={modalOpen} setModalOpen={setModalOpen} />;
           case "simplifiedSettlement":
-            return <SimplifiedSettlementCard key={activity._id} payment={activity} />;
+            return <SimplifiedSettlementCard key={activity._id} settlement={activity} modalOpen={modalOpen} setModalOpen={setModalOpen}/>;
           default:
             return null;
         }
@@ -406,73 +416,62 @@ const GroupDetailPage = ({ groupId }) => {
   );
 };
 
-const ExpenseCard = ({ expense }) => {
-  return (
-    <div className="bg-white p-4 shadow-md rounded-lg">
-      <h2 className="text-xl font-semibold">{expense.description}</h2>
-      <p className="text-gray-600 text-sm">
-        Date: {new Date(expense.createdAt).toLocaleDateString()} | Created by: {expense.createdBy.email}
-      </p>
-      <p className="mt-2 font-semibold">Payers:</p>
-      <ul className="list-disc list-inside text-gray-700">
-        {expense.payers.map((payer) => (
-          <li key={payer._id}>
-            {payer.user.userId}: ${payer.amount}
-          </li>
-        ))}
-      </ul>
-      <p className="mt-2 font-semibold">Splits:</p>
-      <ul className="list-disc list-inside text-gray-700">
-        {expense.splits.map((split) => (
-          <li key={split._id}>
-            {split.user.userId}: ${split.amount}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
 
-const SettlementCard = ({ settlement }) => {
+const SettlementCard = ({ settlement, onCardClick }) => {
   return (
-    <div className="bg-white p-4 shadow-md rounded-lg flex items-center">
-      <span className="text-green-500 text-2xl material-icons">paid</span>
-      <div className="ml-4">
+    <div 
+      className="bg-white p-4 shadow-md rounded-lg cursor-pointer hover:shadow-lg transition-shadow duration-300 flex items-center"
+      onClick={() => onCardClick(settlement)}
+    >
+      <DollarSign className="mr-2 text-green-500" size={24} />
+      <div>
         <h2 className="text-xl font-semibold">Settlement</h2>
         <p className="text-gray-600 text-sm">
           Date: {new Date(settlement.createdAt).toLocaleDateString()}
         </p>
-        <ul className="list-disc list-inside text-gray-700">
-          {settlement.payments.map((payment) => (
-            <li key={payment._id}>
-              {payment.payer.userId} paid {payment.payee.userId} ${payment.amount}
-            </li>
+        <div className="mt-2 text-gray-700">
+          {settlement.payments.slice(0, 2).map((payment, index) => (
+            <div key={payment._id}>
+              {payment.payer.userId} paid {payment.payee.userId} ₹{payment.amount}
+            </div>
           ))}
-        </ul>
+          {settlement.payments.length > 2 && (
+            <div className="text-sm text-gray-500">
+              + {settlement.payments.length - 2} more
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-const SimplifiedSettlementCard = ({ payment }) => {
+const SettlementDetailModal = ({ settlement, open, onClose }) => {
+  if (!settlement) return null;
+
   return (
-    <div className="bg-white p-4 shadow-md rounded-lg flex items-center">
-      <span className="text-blue-500 text-2xl material-icons">settings</span>
-      <div className="ml-4">
-        <h2 className="text-xl font-semibold">Simplified Settlement</h2>
-        <p className="text-gray-600 text-sm">
-          Date: {new Date(payment.createdAt).toLocaleDateString()}
-        </p>
+    <Modal
+      title="Settlement Details"
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      width={600}
+    >
+      <div className="space-y-4">
+        <p><strong>Date:</strong> {new Date(settlement.createdAt).toLocaleString()}</p>
+        
+        <h3 className="text-lg font-semibold mb-2">Payments</h3>
         <ul className="list-disc list-inside text-gray-700">
-          {payment.payments.map((payment) => (
+          {settlement.payments.map((payment) => (
             <li key={payment._id}>
-              {payment.payer.userId} paid {payment.payee.userId} ${payment.amount}
+              {payment.payer.userId} paid {payment.payee.userId} ₹{payment.amount}
             </li>
           ))}
         </ul>
       </div>
-    </div>
+    </Modal>
   );
 };
+
 
 export default GroupDetailPage;
