@@ -15,7 +15,9 @@ import SimplifiedSettlementCard from '../Expenses/SimplifiedSettlementCard';
 import {Select,MenuItem,TextField} from '@mui/material';
 import { FormGroup, FormControlLabel, Switch } from '@mui/material';
 import MemberTable from './MemberTable';
-import { Receipt, DollarSign, Calculator } from 'lucide-react';
+import { Receipt, DollarSign, Calculator ,Plus} from 'lucide-react';
+import GroupBalancesComponent from './GroupBalancesComponent';
+import ExpenseModal from './ExpenseModal';
 // import Select from '@mui/material';
 // import MenuItem from '@mui/material';
 
@@ -360,6 +362,7 @@ const GroupDetailPage = ({ groupId }) => {
   const [selectedSimplifiedSettlement, setSelectedSimplifiedSettlement] = useState(null);
   const [user,setUser]=useState(getNativeSelectUtilityClasses)
   const [modalOpen,setModalOpen]=useState(false)
+  const [visible,setVisible]=useState(false)
     const BASEURL='http://localhost:3000'
   let { id } = useParams();
   groupId=id
@@ -398,6 +401,9 @@ const GroupDetailPage = ({ groupId }) => {
 
   return (
     <div className="space-y-4 p-4 bg-gray-100">
+      
+     <GroupBalancesComponent/>
+     <ExpenseModal visible={visible} setVisible={setVisible} groupId={groupId} token={token}/>
      
       <h1 className="text-2xl font-bold text-gray-700">Group Activities</h1>
       {activities.map((activity) => {
@@ -412,7 +418,18 @@ const GroupDetailPage = ({ groupId }) => {
             return null;
         }
       })}
+      <button 
+  className="fixed bottom-[100px] right-10 px-6 py-4 rounded-full bg-blue-500 
+  text-white font-medium shadow-lg hover:bg-blue-600 active:bg-blue-700 
+  transform hover:scale-105 transition-all duration-200 flex items-center gap-2 
+  hover:shadow-xl active:scale-95"
+  onClick={()=>{setVisible(true)}}
+>
+  <Plus size={20} />
+  Add Expense
+</button>
     </div>
+    
   );
 };
 
