@@ -1,97 +1,140 @@
 import React, { useState } from 'react';
-import { Modal, Button, Input, List } from 'antd';
-import { CloseCircleOutlined } from '@ant-design/icons';
+import { Modal, Button, Input, List, Tag } from 'antd';
+import axios from 'axios';
 
-const AddMembers = ({ friends, addMembers }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [emails, setEmails] = useState([]); // Stores the list of emails
-  const [inputEmail, setInputEmail] = useState(''); // Stores the current email input
+const BASEURL = 'http://localhost:3000';
+ // Replace with your token
 
-  // Show the modal
+const AddUsersToGroup = ({ groupId ,token,visible,setVisible}) => {
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Open Modal
   const showModal = () => {
-    setIsModalOpen(true);
+    setVisible(true);
   };
 
- 
-  const handleOk = () => {
-    addMembers(emails); // Call the API with the emails
-    setIsModalOpen(false);
-    setEmails([]); // Clear the email list after submission
-    setInputEmail(''); 
-  };
-
-  // On "Cancel" button press
+  // Close Modal
   const handleCancel = () => {
-    setIsModalOpen(false);
-    setEmails([]); // Clear the list
-    setInputEmail(''); // Clear the input
+    setVisible(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedUsers([]);
   };
 
-  // Handle input change to update the current email being typed
-  const handleInputChange = (event) => {
-    setInputEmail(event.target.value);
-  };
+  // Fetch users based on search input
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
 
-  // Add the email to the list when the user presses enter
-  const handleAddEmail = () => {
-    if (inputEmail && !emails.includes(inputEmail)) {
-      setEmails([...emails, inputEmail]);
-      setInputEmail(''); // Clear the input field after adding
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await axios.get(`${BASEURL}/users/search`, {
+        params: { query },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSearchResults(response.data);
+    } catch (err) {
+      console.error("Error searching users:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Remove email from the list
-  const handleRemoveEmail = (emailToRemove) => {
-    setEmails(emails.filter((email) => email !== emailToRemove));
+  // Add user to selected list
+  const handleAddUser = (user) => {
+    if (!selectedUsers.find((u) => u._id === user._id)) {
+      setSelectedUsers([...selectedUsers, user]);
+    }
+  };
+
+  // Remove user from selected list
+  const handleRemoveUser = (userId) => {
+    setSelectedUsers(selectedUsers.filter((user) => user._id !== userId));
+  };
+
+  // Confirm and send API call to add users to group
+  const handleOk = async () => {
+    try {
+      await axios.post(
+        `${BASEURL}/group/${groupId}/add-members`,
+        {
+          users: selectedUsers.map((user) => user._id),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Users added successfully!");
+      setVisible(false);
+    } catch (err) {
+      console.error("Error adding users to group:", err);
+    }
   };
 
   return (
-    <>
+    <div>
       <Button type="primary" onClick={showModal}>
-        Add Members
+        Add Users to Group
       </Button>
       <Modal
-        title="Add Members"
-        open={isModalOpen}
+        title="Add Users to Group"
+        visible={visible}
         onOk={handleOk}
         onCancel={handleCancel}
-        centered
+        okText="Add"
+        cancelText="Cancel"
       >
-        {/* Email input field */}
-        <div className="mb-4">
-          <p>Add Email:</p>
-          <Input
-            type="email"
-            placeholder="Enter email"
-            value={inputEmail}
-            onChange={handleInputChange}
-            onPressEnter={handleAddEmail} // Add email on pressing "Enter"
-          />
-          <Button type="primary" onClick={handleAddEmail} className="mt-2">
-            Add to List
-          </Button>
-        </div>
-
-        {/* Display list of added emails */}
+        <Input
+          placeholder="Search users by username"
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          style={{ marginBottom: 16 }}
+        />
         <List
+          loading={loading}
           bordered
-          dataSource={emails}
-          renderItem={(email) => (
+          dataSource={searchResults}
+          renderItem={(user) => (
             <List.Item
               actions={[
-                <CloseCircleOutlined
-                  onClick={() => handleRemoveEmail(email)}
-                  style={{ color: 'red' }}
-                />,
+                <Button type="link" onClick={() => handleAddUser(user)}>
+                  Add
+                </Button>,
               ]}
             >
-              {email}
+              {user.userId} {/* Display userId (username) */}
             </List.Item>
           )}
         />
+        <div style={{ marginTop: 16 }}>
+          <h3>Selected Users</h3>
+          {selectedUsers.map((user) => (
+            <Tag
+              key={user._id}
+              closable
+              onClose={() => handleRemoveUser(user._id)}
+            >
+              {user.userId} {/* Display userId (username) */}
+            </Tag>
+          ))}
+        </div>
       </Modal>
-    </>
+    </div>
   );
 };
 
-export default AddMembers;
+export default AddUsersToGroup;

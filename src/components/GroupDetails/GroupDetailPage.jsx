@@ -18,6 +18,7 @@ import MemberTable from './MemberTable';
 import { Receipt, DollarSign, Calculator ,Plus} from 'lucide-react';
 import GroupBalancesComponent from './GroupBalancesComponent';
 import ExpenseModal from './ExpenseModal';
+import AddUsersToGroup from './AddMembers';
 // import Select from '@mui/material';
 // import MenuItem from '@mui/material';
 
@@ -363,6 +364,7 @@ const GroupDetailPage = ({ groupId }) => {
   const [user,setUser]=useState(getNativeSelectUtilityClasses)
   const [modalOpen,setModalOpen]=useState(false)
   const [visible,setVisible]=useState(false)
+  const [visible2, setVisible2] = useState(false);
     const BASEURL='http://localhost:3000'
   let { id } = useParams();
   groupId=id
@@ -397,13 +399,14 @@ const GroupDetailPage = ({ groupId }) => {
   }, [groupId]);
 
   if (loading) return <div>Loading...</div>;
-  if (activities.length === 0) return <div>No activities found.</div>;
+ // if (activities.length === 0) return <div>No activities found.</div>;
 
   return (
     <div className="space-y-4 p-4 bg-gray-100">
       
      <GroupBalancesComponent/>
      <ExpenseModal visible={visible} setVisible={setVisible} groupId={groupId} token={token}/>
+     <AddUsersToGroup token={token} groupId={groupId} setVisible={setVisible2} visible={visible2}/>
      
       <h1 className="text-2xl font-bold text-gray-700">Group Activities</h1>
       {activities.map((activity) => {
@@ -418,6 +421,17 @@ const GroupDetailPage = ({ groupId }) => {
             return null;
         }
       })}
+     
+      {/* <button 
+  className="fixed bottom-[170px] right-10 px-6 py-4 rounded-full bg-blue-700 
+  text-white font-medium shadow-lg hover:bg-blue-600 active:bg-blue-700 
+  transform hover:scale-105 transition-all duration-200 flex items-center gap-2 
+  hover:shadow-xl active:scale-95"
+  onClick={()=>{setVisible2(true)}}
+>
+  <Plus size={20} />
+  Add Users
+</button> */}
       <button 
   className="fixed bottom-[100px] right-10 px-6 py-4 rounded-full bg-blue-500 
   text-white font-medium shadow-lg hover:bg-blue-600 active:bg-blue-700 
