@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Modal, Button, Input, Spin, AutoComplete } from 'antd';
 import axios from 'axios';
 import FriendsCard from './FriendsCard';
+import { Link ,useNavigate} from 'react-router-dom';
 
 const FriendsPage = () => {
   const [friends, setFriends] = useState([]);
@@ -13,6 +14,7 @@ const FriendsPage = () => {
   const [pageLoading, setPageLoading] = useState(false);
   const token = useSelector((state) => state.auth.token);
   const [totalBalance, setTotalBalance] = useState(0);
+  
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -155,7 +157,9 @@ const FriendsPage = () => {
       ) : (
         <div className="space-y-4">
           {friends.map((friendData) => (
+            <Link to={`/friend/${friendData.friendId}`}>
             <FriendsCard key={friendData.friendId} friendData={friendData} />
+            </Link>
           ))}
         </div>
       )}

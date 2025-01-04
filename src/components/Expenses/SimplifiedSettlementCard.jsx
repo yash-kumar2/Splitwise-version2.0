@@ -17,7 +17,7 @@ const style = {
   p: 4,
 };
 
-const SimplifiedSettlementCard = ({ settlement ,modalOpen,setModalOpen}) => {
+const SimplifiedSettlementCard = ({ settlement ,modalOpen,setModalOpen,mode}) => {
   const date = new Date(settlement.createdAt);
   const formattedDate = date.toLocaleDateString('en-US', {
     month: 'short',
@@ -113,6 +113,11 @@ const SimplifiedSettlementCard = ({ settlement ,modalOpen,setModalOpen}) => {
             }
             setModalOpen(true)
           }} className="ml-2 text-green-500"/>
+          {mode && (
+          <h2 className="text-lg font-semibold text-blue-800 ml-auto">
+            group: {settlement.group.name}
+          </h2>
+        )}
       </div>
       <div className="flex justify-between items-center">
         <div className="text-left">

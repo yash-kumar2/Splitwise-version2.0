@@ -14,7 +14,7 @@ import { Provider } from 'react-redux';
 import store from '../Auth/store.js';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute.jsx';
 import GroupDetailPage from './components/GroupDetails/GroupDetailPage.jsx';
-
+import FriendDetailPage from './components/Friends/FriendDetailPage.jsx';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<Layout />}>
@@ -32,6 +32,14 @@ const router = createBrowserRouter(
         element={
           <PrivateRoute>
             <Friends />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='friend/:id'
+        element={
+          <PrivateRoute>
+            <FriendDetailPage />
           </PrivateRoute>
         }
       />

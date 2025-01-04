@@ -17,7 +17,7 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-const ExpenseCard = ({ expense,user,modalOpen,setModalOpen}) => {
+const ExpenseCard = ({ expense,user,modalOpen,setModalOpen,mode}) => {
   const date = new Date(expense.createdAt);
   const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' });
   const month = date.toLocaleDateString('en-US', { month: 'long' });
@@ -85,7 +85,7 @@ const ExpenseCard = ({ expense,user,modalOpen,setModalOpen}) => {
         <div className="bg-gray-50 p-3 rounded-lg">
           <h3 className="text-lg font-semibold mb-2">Expense Summary</h3>
           <p><strong>Total Amount:</strong> ₹{totalAmount}</p>
-          <p><strong>Group:</strong> {expense.group}</p>
+          <p><strong>Group:</strong> {expense.group.name}</p>
         </div>
         
         <div>
@@ -114,9 +114,16 @@ const ExpenseCard = ({ expense,user,modalOpen,setModalOpen}) => {
         
       </Modal>
       <div className="flex items-center mb-2">
-        <Receipt className="mr-2 text-blue-500" size={24} />
+      <Receipt className="mr-2 text-blue-500" size={24} />
+      <div className="flex items-center w-full">
         <h2 className="text-xl font-semibold">{expense.description}</h2>
+        {mode && (
+          <h2 className="text-lg font-semibold text-blue-800 ml-auto">
+            group: {expense.group.name}
+          </h2>
+        )}
       </div>
+    </div>
       <div className="flex justify-between items-center">
         <div className="text-left">
           <div className="text-lg font-bold">{formattedDate.split(' ')[1]}</div>
