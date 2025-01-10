@@ -5,7 +5,7 @@ import React from 'react';
 import ExpenseCard from '../Expenses/ExpenseCard';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Modal } from 'antd';
+import { Modal,Button } from 'antd';
 import AddMembers from './AddMembers'; 
 // // import { FormControl } from '@mui/material';
 // // import Select from '@mui/material';
@@ -19,6 +19,7 @@ import { Receipt, DollarSign, Calculator ,Plus} from 'lucide-react';
 import GroupBalancesComponent from './GroupBalancesComponent';
 import ExpenseModal from './ExpenseModal';
 import AddUsersToGroup from './AddMembers';
+import CircleHelpIcon from './CircleHelp';
 
 import axios from 'axios';
 
@@ -36,6 +37,22 @@ const GroupDetailPage = ({ groupId }) => {
   let { id } = useParams();
   groupId=id
   const token = useSelector((state) => state.auth.token);
+  const simplifyPayments= async ()=>{
+    try{
+    const response=await axios.post(`${BASEURL}/group/${groupId}/simplify-payments`,{},{
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    }
+    catch{
+      console.error("Error simplifying payments:", error);
+
+    }
+  }
+
+
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -74,6 +91,11 @@ const GroupDetailPage = ({ groupId }) => {
      <GroupBalancesComponent/>
      <ExpenseModal visible={visible} setVisible={setVisible} groupId={groupId} token={token}/>
      <AddUsersToGroup token={token} groupId={groupId} setVisible={setVisible2} visible={visible2}/>
+     <div className='flex'>
+     <Button type="primary" onClick={simplifyPayments} >
+        Simplify System Payments
+      </Button>
+     <CircleHelpIcon modalOpen={modalOpen} setModalOpen={setModalOpen}/></div>
      
       <h1 className="text-2xl font-bold text-gray-700">Group Activities</h1>
       {activities.map((activity) => {

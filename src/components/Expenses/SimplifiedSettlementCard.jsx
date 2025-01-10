@@ -98,6 +98,7 @@ const SimplifiedSettlementCard = ({ settlement ,modalOpen,setModalOpen,mode}) =>
       >
         
         <Box sx={style}>
+          <p>Simplified payments streamline group expense settlements by reducing unnecessary transactions while keeping balances accurate. You only owe those you originally did, and your total owed amount stays the same—just easier to manage and settle.</p>
           
         </Box>
       </Modal>
