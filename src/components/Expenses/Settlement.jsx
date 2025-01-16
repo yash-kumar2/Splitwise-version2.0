@@ -194,7 +194,7 @@ const SettlementCard = ({ settlement, modalOpen, setModalOpen, mode, user }) => 
                 setDeleteModalOpen(true);
                 setModalOpen(true);
               }}
-              className="delete-btn ml-4 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+              className="delete-btn ml-4 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded ml-auto"
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : <Trash />}

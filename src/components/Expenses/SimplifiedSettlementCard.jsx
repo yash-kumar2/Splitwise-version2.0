@@ -135,7 +135,7 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
             </button>
             <button
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 ml-auto absolute right-0"
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 "
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
@@ -169,7 +169,7 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
                 setDeleteModalOpen(true);
                 setModalOpen(true);
               }}
-              className="delete-btn ml-4 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+              className="delete-btn ml-4 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded ml-auto"
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : <Trash />}
