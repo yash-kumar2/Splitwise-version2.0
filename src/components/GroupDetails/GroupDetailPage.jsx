@@ -20,6 +20,8 @@ import GroupBalancesComponent from './GroupBalancesComponent';
 import ExpenseModal from './ExpenseModal';
 import AddUsersToGroup from './AddMembers';
 import CircleHelpIcon from './CircleHelp';
+import AddSettlement from './AddSettlement';
+import SettlementCard from '../Expenses/Settlement';
 
 import axios from 'axios';
 
@@ -91,6 +93,7 @@ const GroupDetailPage = ({ groupId }) => {
      <GroupBalancesComponent/>
      <ExpenseModal visible={visible} setVisible={setVisible} groupId={groupId} token={token}/>
      <AddUsersToGroup token={token} groupId={groupId} setVisible={setVisible2} visible={visible2}/>
+     <AddSettlement groupId={groupId}/>
      <div className='flex'>
      <Button type="primary" onClick={simplifyPayments} >
         Simplify System Payments
@@ -104,7 +107,7 @@ const GroupDetailPage = ({ groupId }) => {
           case "expense":
             return <ExpenseCard key={activity._id} expense={activity} user={user} modalOpen={modalOpen} setModalOpen={setModalOpen} />;
           case "settlement":
-            return <SettlementCard key={activity._id} settlement={activity} modalOpen={modalOpen} setModalOpen={setModalOpen} />;
+            return <SettlementCard key={activity._id} settlement={activity} user={user} modalOpen={modalOpen} setModalOpen={setModalOpen} />;
           case "simplifiedSettlement":
             return <SimplifiedSettlementCard key={activity._id} settlement={activity} modalOpen={modalOpen} setModalOpen={setModalOpen}/>;
           default:
@@ -138,34 +141,7 @@ const GroupDetailPage = ({ groupId }) => {
 };
 
 
-const SettlementCard = ({ settlement, onCardClick }) => {
-  return (
-    <div 
-      className="bg-white p-4 shadow-md rounded-lg cursor-pointer hover:shadow-lg transition-shadow duration-300 flex items-center"
-      onClick={() => onCardClick(settlement)}
-    >
-      <DollarSign className="mr-2 text-green-500" size={24} />
-      <div>
-        <h2 className="text-xl font-semibold">Settlement</h2>
-        <p className="text-gray-600 text-sm">
-          Date: {new Date(settlement.createdAt).toLocaleDateString()}
-        </p>
-        <div className="mt-2 text-gray-700">
-          {settlement.payments.slice(0, 2).map((payment, index) => (
-            <div key={payment._id}>
-              {payment.payer.userId} paid {payment.payee.userId} ₹{payment.amount}
-            </div>
-          ))}
-          {settlement.payments.length > 2 && (
-            <div className="text-sm text-gray-500">
-              + {settlement.payments.length - 2} more
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+
 
 const SettlementDetailModal = ({ settlement, open, onClose }) => {
   if (!settlement) return null;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import { Receipt, DollarSign, Calculator, CircleHelp, Trash } from 'lucide-react';
+import { Receipt, DollarSign, Calculator, Trash, Check } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 
@@ -17,7 +17,7 @@ const style = {
   p: 4,
 };
 
-const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, user }) => {
+const SettlementCard = ({ settlement, modalOpen, setModalOpen, mode, user }) => {
   const date = new Date(settlement.createdAt);
   const formattedDate = date.toLocaleDateString('en-US', {
     month: 'short',
@@ -31,25 +31,30 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
   });
 
   const [open, setOpen] = useState(false);
-  const [openInfo, setOpenInfo] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const token = useSelector((state) => state.auth.token);
 
-  const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setModalOpen(false);
-    setOpenInfo(false);
     setOpen(false);
   };
 
-  // Check if user can delete - similar to ExpenseCard logic
-  const canDelete = 1;
+  // Calculate total settlement amount
+  const totalAmount = settlement.settlements.reduce((sum, item) => sum + item.amount, 0);
+
+  // Check if user is the settler or involved in settlements
+  const isSettler = settlement.settler._id === user;
+  const isInvolved = settlement.settlements.some(item => item.user._id === user);
+  const canDelete = isSettler || isInvolved;
+
+  // Check if current user has read the settlement
+  const hasRead = 1;
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      const response = await axios.delete(`http://localhost:3000/simplified-payment/${settlement._id}`, {
+      const response = await axios.delete(`http://localhost:3000/settlement/${settlement._id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -67,9 +72,25 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
     }
   };
 
+  // Mark settlement as read
+  const markAsRead = async (e) => {
+    e.stopPropagation();
+    try {
+      await axios.post(`http://localhost:3000/settlement/${settlement._id}/read`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } catch (error) {
+      console.error('Error marking settlement as read:', error);
+    }
+  };
+
   return (
     <div
-      className="bg-white p-4 shadow-md rounded-lg cursor-pointer hover:shadow-lg transition-shadow duration-300"
+      className={`bg-white p-4 shadow-md rounded-lg cursor-pointer hover:shadow-lg transition-shadow duration-300 ${
+        !hasRead ? 'border-l-4 border-blue-500' : ''
+      }`}
       onClick={(e) => {
         if (e.target.closest('.delete-btn')) {
           return;
@@ -77,6 +98,9 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
         if (!modalOpen) {
           setModalOpen(true);
           setOpen(true);
+          if (!hasRead) {
+            markAsRead(e);
+          }
         }
       }}
     >
@@ -88,28 +112,34 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
       >
         <Box sx={style}>
           <div className="space-y-4">
+            <div className="flex justify-between">
+              <p>
+                <strong>Date:</strong> {new Date(settlement.createdAt).toLocaleString()}
+              </p>
+              <p>
+                <strong>Settler:</strong> {settlement.settler.userId}
+              </p>
+            </div>
+
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">Settlement Summary</h3>
+              <p><strong>Total Amount:</strong> ₹{totalAmount}</p>
+              {settlement.group && (
+                <p><strong>Group:</strong> {settlement.group.name}</p>
+              )}
+            </div>
+
             <div>
-              <h3 className="text-lg font-semibold mb-2">Payments</h3>
+              <h3 className="text-lg font-semibold mb-2">Settlement Details</h3>
               <ul className="list-disc list-inside text-gray-700">
-                {settlement.payments.map((payment) => (
-                  <li key={payment._id}>
-                    {payment.payer.userId} paid {payment.payee.userId}: ₹{payment.amount}
+                {settlement.settlements.map((item, index) => (
+                  <li key={index}>
+                    {item.user.userId}: ₹{item.amount}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-        </Box>
-      </Modal>
-
-      <Modal
-        open={openInfo}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <p>Simplified payments streamline group expense settlements by reducing unnecessary transactions while keeping balances accurate. You only owe those you originally did, and your total owed amount stays the same—just easier to manage and settle.</p>
         </Box>
       </Modal>
 
@@ -135,7 +165,7 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
             </button>
             <button
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 ml-auto absolute right-0"
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
@@ -145,20 +175,15 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
       </Modal>
 
       <div className="flex items-center mb-2">
-        <Calculator className="mr-2 text-blue-500" size={24} />
+        <DollarSign className="mr-2 text-blue-500" size={24} />
         <div className="flex items-center w-full">
-          <h2 className="text-xl font-semibold">System Simplified Settlements</h2>
-          <CircleHelp
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenInfo(true);
-              if (!modalOpen) {
-                setModalOpen(true);
-              }
-            }}
-            className="ml-2 text-green-500"
-          />
-          {mode && (
+          <h2 className="text-xl font-semibold">Settlement</h2>
+          {!hasRead && (
+            <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+              New
+            </span>
+          )}
+          {mode && settlement.group && (
             <h2 className="text-lg font-semibold text-blue-800 ml-auto">
               group: {settlement.group.name}
             </h2>
@@ -185,11 +210,16 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
           <div className="text-sm text-gray-600">{formattedTime}</div>
         </div>
         <div className="text-right">
-          <p className="font-semibold text-gray-800">Generated by system</p>
+          <p className="font-semibold text-gray-800">
+            Total: ₹{totalAmount}
+          </p>
+          <p className="text-sm text-gray-600">
+            {isSettler ? 'You settled' : `Settled by ${settlement.settler.userId}`}
+          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default SimplifiedSettlementCard;
+export default SettlementCard;
