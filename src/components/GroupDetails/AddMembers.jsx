@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, Input, List, Tag } from 'antd';
 import axios from 'axios';
 
-const BASEURL = 'http://localhost:3000';
+const BASEURL = 'https://splitwise-backend-hd2z.onrender.com';
  // Replace with your token
 
 const AddUsersToGroup = ({ groupId ,token,visible,setVisible}) => {

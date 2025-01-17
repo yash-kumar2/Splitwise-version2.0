@@ -61,7 +61,7 @@ const ExpenseCard = ({ expense, user, modalOpen, setModalOpen, mode }) => {
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      const response = await axios.delete(`http://localhost:3000/expense/${expense._id}`, {
+      const response = await axios.delete(`https://splitwise-backend-hd2z.onrender.com/expense/${expense._id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

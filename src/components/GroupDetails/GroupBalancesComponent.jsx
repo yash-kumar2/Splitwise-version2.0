@@ -14,7 +14,7 @@ const GroupBalancesComponent = () => {
 
   const token = useSelector((state) => state.auth.token);
   const { id: groupId } = useParams();
-  const BASEURL = 'http://localhost:3000';
+  const BASEURL = 'https://splitwise-backend-hd2z.onrender.com';
 
   useEffect(() => {
     const fetchGroupBalances = async () => {

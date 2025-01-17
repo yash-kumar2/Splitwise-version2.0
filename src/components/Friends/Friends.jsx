@@ -20,7 +20,7 @@ const FriendsPage = () => {
     const fetchFriends = async () => {
       setPageLoading(true);
       try {
-        const response = await axios.get('http://localhost:3000/friend-balances', {
+        const response = await axios.get('https://splitwise-backend-hd2z.onrender.com/friend-balances', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -48,7 +48,7 @@ const FriendsPage = () => {
 
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/users/search`, {
+      const response = await axios.get(`https://splitwise-backend-hd2z.onrender.com/users/search`, {
         params: { query },
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ const FriendsPage = () => {
 
   const handleAddFriend = async (userId) => {
     try {
-      await axios.post('http://localhost:3000/add-friend', 
+      await axios.post('https://splitwise-backend-hd2z.onrender.com/add-friend', 
         { friendId: userId },
         {
           headers: {
@@ -86,7 +86,7 @@ const FriendsPage = () => {
       );
       
       // Refresh friends list
-      const response = await axios.get('http://localhost:3000/friend-balances', {
+      const response = await axios.get('https://splitwise-backend-hd2z.onrender.com/friend-balances', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

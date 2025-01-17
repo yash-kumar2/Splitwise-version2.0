@@ -19,7 +19,7 @@ const GroupsPage = () => {
     const fetchGroups = async () => {
       setLoader(true)
       try {
-        const response = await fetch('http://localhost:3000/groups', {
+        const response = await fetch('https://splitwise-backend-hd2z.onrender.com/groups', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -54,7 +54,7 @@ const GroupsPage = () => {
     setConfirmLoading(true)
     try {
       const response = await axios.post(
-        'http://localhost:3000/group',
+        'https://splitwise-backend-hd2z.onrender.com/group',
         { name: newGroupName }, // Payload containing the group name
         {
           headers: {

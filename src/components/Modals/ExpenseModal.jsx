@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Spin, Form, Input, Select, Button, Alert } from 'antd';
 import axios from 'axios';
 
-const BASEURL = 'http://localhost:3000';
+const BASEURL = 'https://splitwise-backend-hd2z.onrender.com';
 
 const ExpenseModal = ({ visible, setVisible, groupId, token }) => {
   const [members, setMembers] = useState([]);

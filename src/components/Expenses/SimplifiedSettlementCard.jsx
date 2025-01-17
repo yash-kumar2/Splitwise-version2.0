@@ -49,7 +49,7 @@ const SimplifiedSettlementCard = ({ settlement, modalOpen, setModalOpen, mode, u
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      const response = await axios.delete(`http://localhost:3000/simplified-payment/${settlement._id}`, {
+      const response = await axios.delete(`https://splitwise-backend-hd2z.onrender.com/simplified-payment/${settlement._id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

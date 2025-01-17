@@ -15,7 +15,7 @@ const FriendDetailPage = () => {
   const [friend, setFriend] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
-  const BASEURL = 'http://localhost:3000';
+  const BASEURL = 'https://splitwise-backend-hd2z.onrender.com';
    const [user,setUser]=useState()
   
   

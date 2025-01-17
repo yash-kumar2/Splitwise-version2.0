@@ -15,7 +15,7 @@ const AddSettlement = ({ groupId, userId }) => {
   const fetchBalances = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/group/${groupId}/balances`, {
+      const response = await axios.get(`https://splitwise-backend-hd2z.onrender.com/group/${groupId}/balances`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -50,7 +50,7 @@ const AddSettlement = ({ groupId, userId }) => {
           amount: settlement.amount
         }));
 
-      const response = await axios.post('http://localhost:3000/settlement', {
+      const response = await axios.post('https://splitwise-backend-hd2z.onrender.com/settlement', {
         group: groupId,
         settlements: settlements
       }, {

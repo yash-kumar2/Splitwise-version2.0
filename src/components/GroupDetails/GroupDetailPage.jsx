@@ -35,7 +35,7 @@ const GroupDetailPage = ({ groupId }) => {
   const [modalOpen,setModalOpen]=useState(false)
   const [visible,setVisible]=useState(false)
   const [visible2, setVisible2] = useState(false);
-    const BASEURL='http://localhost:3000'
+    const BASEURL='https://splitwise-backend-hd2z.onrender.com'
   let { id } = useParams();
   groupId=id
   const token = useSelector((state) => state.auth.token);

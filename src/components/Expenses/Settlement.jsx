@@ -54,7 +54,7 @@ const SettlementCard = ({ settlement, modalOpen, setModalOpen, mode, user }) => 
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      const response = await axios.delete(`http://localhost:3000/settlement/${settlement._id}`, {
+      const response = await axios.delete(`https://splitwise-backend-hd2z.onrender.com/settlement/${settlement._id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -76,7 +76,7 @@ const SettlementCard = ({ settlement, modalOpen, setModalOpen, mode, user }) => 
   const markAsRead = async (e) => {
     e.stopPropagation();
     try {
-      await axios.post(`http://localhost:3000/settlement/${settlement._id}/read`, {}, {
+      await axios.post(`https://splitwise-backend-hd2z.onrender.com/settlement/${settlement._id}/read`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }

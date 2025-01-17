@@ -5,7 +5,7 @@ import { TextField, Button } from '@mui/material';
 
 const ProfilePage = () => {
   const token = useSelector((state) => state.auth.token); // Get token from redux store
-  const BASEURL = 'http://localhost:3000';
+  const BASEURL = 'https://splitwise-backend-hd2z.onrender.com';
 
   // State for user profile details
   const [user, setUser] = useState({
