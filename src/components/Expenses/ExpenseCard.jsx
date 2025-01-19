@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Receipt, DollarSign, Calculator,Trash } from 'lucide-react';
+import { Receipt, DollarSign, Calculator,Trash,FileText } from 'lucide-react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -18,6 +18,14 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+const fileModalStyle = {
+  ...style,
+  width: '90%',
+  maxWidth: '1000px',
+  height: '90%',
+  overflow: 'auto',
+};
+
 
 const ExpenseCard = ({ expense, user, modalOpen, setModalOpen, mode }) => {
   const date = new Date(expense.createdAt);
@@ -28,6 +36,8 @@ const ExpenseCard = ({ expense, user, modalOpen, setModalOpen, mode }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const token = useSelector((state) => state.auth.token);
+  const [fileModalOpen, setFileModalOpen] = useState(false);
+  const [fileType, setFileType] = useState(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -88,6 +98,26 @@ const ExpenseCard = ({ expense, user, modalOpen, setModalOpen, mode }) => {
       setOpen(true);
     }
   };
+  const checkFileType = async () => {
+    try {
+      const response = await axios.get(`https://splitwise-backend-hd2z.onrender.com/file/${expense.file}/metadata`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setFileType(response.data.contentType);
+      setFileModalOpen(true);
+      setModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching file metadata:', error);
+    }
+  };
+
+  const handleFileView = (e) => {
+    e.stopPropagation();
+    checkFileType();
+  }
+  
 
   return (
     <div 
@@ -103,17 +133,31 @@ const ExpenseCard = ({ expense, user, modalOpen, setModalOpen, mode }) => {
               group: {expense.group.name}
             </h2>
           )}
+          <div className='ml-auto flex'>
+          {expense.file && (
+              <button
+                onClick={handleFileView}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded flex items-center gap-1"
+              >
+                <FileText size={16} />
+                
+              </button>
+            )}
+          
           {canDelete && (
             <button
               onClick={() => {setDeleteModalOpen(true)
                 setModalOpen(true)
               }}
-              className="delete-btn ml-4 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded ml-auto"
+              className="delete-btn ml-4 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : <Trash/>}
             </button>
           )}
+          </div>
+
+
         </div>
       </div>
 
@@ -206,6 +250,51 @@ const ExpenseCard = ({ expense, user, modalOpen, setModalOpen, mode }) => {
           </div>
         </Box>
       </Modal>
+      <Modal
+        open={fileModalOpen}
+        onClose={() => {
+          setFileModalOpen(false);
+          setModalOpen(false);
+        }}
+        aria-labelledby="file-modal-title"
+        aria-describedby="file-modal-description"
+      >
+        <Box sx={fileModalStyle}>
+          <div className="h-full flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">File Viewer</h2>
+              <button
+                onClick={() => {
+                  setFileModalOpen(false);
+                  setModalOpen(false);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto">
+              {fileType?.startsWith('image/') ? (
+                <img
+                  src={`https://splitwise-backend-hd2z.onrender.com/file/${expense.file}`}
+                  alt="Expense receipt"
+                  className="max-w-full h-auto"
+                  style={{ margin: 'auto' }}
+                />
+              ) : (
+                <iframe
+                  src={`https://splitwise-backend-hd2z.onrender.com/file/${expense.file}`}
+                  title="PDF Viewer"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                />
+              )}
+            </div>
+          </div>
+        </Box>
+      </Modal>
+
     </div>
   );
 };
